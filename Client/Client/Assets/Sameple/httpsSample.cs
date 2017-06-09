@@ -35,7 +35,7 @@ public class httpsSample : MonoBehaviour {
             }
             else if (wwwDownload.isDone == true)
             {
-                Debug.LogError("HttpCallback : " + wwwDownload.text);
+                Debug.Log("HttpCallback : " + wwwDownload.text);
             }
         });
 
@@ -43,8 +43,48 @@ public class httpsSample : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
+        if (responseDataListEmpty == false)
+        {
+            lock (responseDataList)
+            {
+                if (responseDataList.Count <= 0)
+                    return;
+
+                HTTPResponseData data = responseDataList[0];
+
+                try
+                {
+                    if (data.callback != null)
+                    {
+                        WWWProxy wwwProxy = new WWWProxy(null);
+                        wwwProxy.error = data.error;
+                        wwwProxy.isDone = string.IsNullOrEmpty(data.error) == true ? true : false;
+                        wwwProxy.text = data.result;
+                        wwwProxy.bytes = data.bytes;
+
+                        data.callback(wwwProxy);
+
+                        wwwProxy = null;
+                    }
+                    else
+                    {
+                        Debug.Log("[Callback is NULL] Post : " + data.post + ", Result : " + data.result);
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
+                finally
+                {
+                    responseDataList.RemoveAt(0);
+
+                    if (responseDataList.Count <= 0)
+                        responseDataListEmpty = true;
+                }
+            }
+        }
+    }
 
     void HTTPAsyncCallbackBinary(HttpWebRequestCallbackState reqeustCallbackState)
     {
