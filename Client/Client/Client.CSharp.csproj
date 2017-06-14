@@ -63,6 +63,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\HttpSocketBase.cs" />
+    <Compile Include="Assets\HttpSocketForm.cs" />
+    <Compile Include="Assets\HttpSocketJson.cs" />
+    <Compile Include="Assets\HttpTest.cs" />
     <Compile Include="Assets\Sameple\HttpSocket.cs" />
     <Compile Include="Assets\Sameple\WWWProxy.cs" />
     <Compile Include="Assets\Sameple\httpsSample.cs" />

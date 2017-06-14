@@ -22,6 +22,7 @@ public class httpsSample : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+
         Dictionary<string, string> post = new Dictionary<string, string>();
         post.Add("nickname", "testUnity");
         post.Add("password", "testPassword");

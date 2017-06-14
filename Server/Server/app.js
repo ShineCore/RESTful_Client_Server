@@ -22,7 +22,7 @@ app.post('/api/accounts', function (req, res) {
     var account = new Account();
     account.nickname = req.body.nickname;
     account.password = req.body.password;
-    account.create_date = new Date(req.body.create_date);
+    account.create_date = Date.now();
     account.save(function (err) {
         if (err) {
             console.error(err);
