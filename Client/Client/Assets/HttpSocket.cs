@@ -7,7 +7,7 @@ using System.Net;
 using System.Collections.Generic;
 
 //동기, 비동기 방식 구분
-//POST, GET Method 전송
+//POST, GET, PUT, DELETE Method 전송
 
 public static class HttpSocket
 {
