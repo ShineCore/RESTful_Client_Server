@@ -9,7 +9,7 @@ using System.Collections.Specialized;
 using System.IO;
 using System.Threading;
 
-public static class HttpSocket
+public static class HttpSocketSample
 {
     public static void Init()
     {

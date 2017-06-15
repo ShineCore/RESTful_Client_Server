@@ -210,7 +210,7 @@ public class httpsSample : MonoBehaviour {
 
         try
         {
-            HttpSocket.PostAsync(url, post, HTTPAsyncCallback, responseData, wwwHeader, "application/json;charset=utf-8");
+            HttpSocketSample.PostAsync(url, post, HTTPAsyncCallback, responseData, wwwHeader, "application/json;charset=utf-8");
         }
         catch (System.Exception ex)
         {
@@ -225,7 +225,7 @@ public class httpsSample : MonoBehaviour {
 
         try
         {
-            HttpSocket.GetAsync(url, HTTPAsyncCallback, responseData);
+            HttpSocketSample.GetAsync(url, HTTPAsyncCallback, responseData);
         }
         catch (System.Exception ex)
         {
@@ -240,7 +240,7 @@ public class httpsSample : MonoBehaviour {
 
         try
         {
-            HttpSocket.GetAsync(url, HTTPAsyncCallbackBinary, responseData);
+            HttpSocketSample.GetAsync(url, HTTPAsyncCallbackBinary, responseData);
         }
         catch (System.Exception ex)
         {

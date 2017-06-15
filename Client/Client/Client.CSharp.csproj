@@ -63,13 +63,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\HttpSocketBase.cs" />
-    <Compile Include="Assets\HttpSocketForm.cs" />
-    <Compile Include="Assets\HttpSocketJson.cs" />
+    <Compile Include="Assets\HttpRequestBodyForm.cs" />
+    <Compile Include="Assets\HttpRequestBodyJson.cs" />
+    <Compile Include="Assets\HttpSocket.cs" />
     <Compile Include="Assets\HttpTest.cs" />
-    <Compile Include="Assets\Sameple\HttpSocket.cs" />
+    <Compile Include="Assets\Sameple\HttpSocketSample.cs" />
     <Compile Include="Assets\Sameple\WWWProxy.cs" />
     <Compile Include="Assets\Sameple\httpsSample.cs" />
+    <Compile Include="Assets\Singleton.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\SyntaxTree\UnityVS\2015\UnityVS.CSharp.targets" />
 </Project>

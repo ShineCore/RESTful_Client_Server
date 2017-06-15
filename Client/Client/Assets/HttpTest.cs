@@ -9,14 +9,19 @@ public class HttpTest : MonoBehaviour {
     {
         if(GUI.Button(new Rect(10, 10, Screen.width - 20, 150), "Create Account") == true)
         {
-            Dictionary<string, string> parameters = new Dictionary<string, string>();
-            parameters.Add("nickname", "BB");
-            parameters.Add("password", "BB_PASSWORD");
-
-            HttpSocketJson.RequestPost("http://127.0.0.1:8080/api/accounts", parameters, (string result) =>
-            {
-                Debug.Log("---- " + result);
-            });
+            CreateAccount("CC", "PASS_CC");
         }
+    }
+
+    void CreateAccount(string nickname, string password)
+    {
+        Dictionary<string, string> parameters = new Dictionary<string, string>();
+        parameters.Add("nickname", nickname);
+        parameters.Add("password", password);
+
+        HttpSocket.SendPOST("http://127.0.0.1:8080/api/accounts", HttpRequestBodyJson.Instance, parameters, (string result) =>
+        {
+            Debug.Log("---- " + result);
+        }, true);
     }
 }
