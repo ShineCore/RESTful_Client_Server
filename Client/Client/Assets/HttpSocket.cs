@@ -24,12 +24,28 @@ public static class HttpSocket
             Send("POST", url, sendBodyClass, requestParameters, responseCallback);
     }
 
-    public static void SendGET(string url, IHttpRequestBody sendBodyClass, Dictionary<string, string> requestParameters, Action<string> responseCallback, bool async = false)
+    public static void SendGET(string url, Action<string> responseCallback, bool async = false)
     {
         if (async)
-            SendAsync("GET", url, sendBodyClass, requestParameters, responseCallback);
+            SendAsync("GET", url, null, null, responseCallback);
         else
-            Send("GET", url, sendBodyClass, requestParameters, responseCallback);
+            Send("GET", url, null, null, responseCallback);
+    }
+
+    public static void SendPUT(string url, IHttpRequestBody sendBodyClass, Dictionary<string, string> requestParameters, Action<string> responseCallback, bool async = false)
+    {
+        if (async)
+            SendAsync("PUT", url, sendBodyClass, requestParameters, responseCallback);
+        else
+            Send("PUT", url, sendBodyClass, requestParameters, responseCallback);
+    }
+
+    public static void SendDELETE(string url, Action<string> responseCallback, bool async = false)
+    {
+        if (async)
+            SendAsync("DELETE", url, null, null, responseCallback);
+        else
+            Send("DELETE", url, null, null, responseCallback);
     }
 
     private static void Send(string httpMethod, string url, IHttpRequestBody sendBodyClass, Dictionary<string, string> requestParameters, Action<string> responseCallback)
@@ -39,7 +55,9 @@ public static class HttpSocket
         if (request == null)
             return;
 
-        Request(request, sendBodyClass.CreateRequestBody(request, requestParameters));
+        if (sendBodyClass != null)
+            Request(request, sendBodyClass.CreateRequestBody(request, requestParameters));
+
         Response(request, responseCallback);
     }
 
@@ -50,11 +68,18 @@ public static class HttpSocket
         if (request == null)
             return;
 
-        RequestAysnc(request, sendBodyClass.CreateRequestBody(request, requestParameters), (HttpWebRequest resultRequest) =>
+        if (sendBodyClass != null)
         {
-            //비동기 요청 완료시 응답 받기
-            ResponseAysnc(resultRequest, responseCallback);
-        });
+            RequestAysnc(request, sendBodyClass.CreateRequestBody(request, requestParameters), (HttpWebRequest resultRequest) =>
+            {
+                //비동기 요청 완료시 응답 받기
+                ResponseAysnc(resultRequest, responseCallback);
+            });
+        }
+        else
+        {
+            ResponseAysnc(request, responseCallback);
+        }
     }
 
     private static HttpWebRequest CreateHttpWebRequest(string url, string httpMethod)
@@ -72,6 +97,9 @@ public static class HttpSocket
 
     private static void Request(HttpWebRequest request, byte[] body)
     {
+        if (body == null || body.Length <= 0)
+            return;
+
         using (Stream requestStream = request.GetRequestStream())
         {
             requestStream.Write(body, 0, body.Length);
@@ -81,6 +109,12 @@ public static class HttpSocket
 
     private static void RequestAysnc(HttpWebRequest request, byte[] body, Action<HttpWebRequest> finishRequestCallback)
     {
+        if (body == null || body.Length <= 0)
+        {
+            finishRequestCallback(request);
+            return;
+        }
+
         request.BeginGetRequestStream(new AsyncCallback((IAsyncResult asyncResult) =>
         {
             HttpWebRequest resultRequest = asyncResult.AsyncState as HttpWebRequest;
@@ -98,15 +132,29 @@ public static class HttpSocket
 
     private static void Response(HttpWebRequest request, Action<string> responseCallback)
     {
-        HttpWebResponse response = request.GetResponse() as HttpWebResponse;
-
-        Debug.Assert(response != null, "httpResonse is null");
-
-        using (Stream responseStream = response.GetResponseStream())
+        try
         {
-            using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+            HttpWebResponse response = request.GetResponse() as HttpWebResponse;
+
+            Debug.Assert(response != null, "httpResonse is null");
+
+            using (Stream responseStream = response.GetResponseStream())
             {
-                responseCallback(reader.ReadToEnd());
+                using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+                {
+                    responseCallback(reader.ReadToEnd());
+                }
+            }
+        }
+        catch (WebException ex)
+        {
+            HttpWebResponse response = ex.Response as HttpWebResponse;
+            using (Stream responseStream = response.GetResponseStream())
+            {
+                using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+                {
+                    responseCallback(reader.ReadToEnd());
+                }
             }
         }
     }
@@ -115,14 +163,28 @@ public static class HttpSocket
     {
         request.BeginGetResponse(new AsyncCallback((IAsyncResult asyncResult) =>
         {
-            HttpWebRequest resultRequest = asyncResult.AsyncState as HttpWebRequest;
-
-            HttpWebResponse response = resultRequest.EndGetResponse(asyncResult) as HttpWebResponse;
-            using (Stream responseStream = response.GetResponseStream())
+            try
             {
-                using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+                HttpWebRequest resultRequest = asyncResult.AsyncState as HttpWebRequest;
+
+                HttpWebResponse response = resultRequest.EndGetResponse(asyncResult) as HttpWebResponse;
+                using (Stream responseStream = response.GetResponseStream())
                 {
-                    responseCallback(reader.ReadToEnd());
+                    using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+                    {
+                        responseCallback(reader.ReadToEnd());
+                    }
+                }
+            }
+            catch (WebException ex)
+            {
+                HttpWebResponse response = ex.Response as HttpWebResponse;
+                using (Stream responseStream = response.GetResponseStream())
+                {
+                    using (StreamReader reader = new StreamReader(responseStream, Encoding.Default))
+                    {
+                        responseCallback(reader.ReadToEnd());
+                    }
                 }
             }
         }),

@@ -19,17 +19,28 @@ var Account = require('./models/account');
 var router = require('./routes')(app, Account);
 //유저 Account 생성
 app.post('/api/accounts', function (req, res) {
-    var account = new Account();
-    account.nickname = req.body.nickname;
-    account.password = req.body.password;
-    account.create_date = Date.now();
-    account.save(function (err) {
+    Account.findOne({ id: req.body.id }, function (err, account) {
         if (err) {
-            console.error(err);
-            res.json({ result: 0 });
-            return;
+            return res.status(500).json({ error: err });
         }
-        res.json({ result: 1 });
+        //계정 없으면 생성
+        if (!account) {
+            var newaccount = new Account();
+            newaccount.id = req.body.id;
+            newaccount.nickname = req.body.nickname;
+            newaccount.create_date = Date.now();
+            newaccount.save(function (err) {
+                if (err) {
+                    console.error(err);
+                    res.json({ result: 0 });
+                    return;
+                }
+                res.json({ result: 1 });
+            });
+        }
+        else {
+            return res.status(400).json({ error: 'this account already exists' });
+        }
     });
 });
 //유저 Account 전체 조회
@@ -53,28 +64,9 @@ app.get('/api/accounts/:nickname', function (req, res) {
         res.json(account);
     });
 });
-//유저 정보 변경 - 찾아서 변경
-//app.put('/api/accounts/:nickname', function (req, res) {
-//    Account.findOne({ nickname: req.params.nickname }, function (err, account) {
-//        if (err) {
-//            return res.status(500).json({ error: 'database failure' });
-//        }
-//        if (!account) {
-//            return res.status(404).json({ error: 'account not found' });
-//        }
-//        if (req.body.password) account.password = req.body.password;
-//        if (req.body.create_date) account.create_date = req.body.create_date;
-//        account.save(function (err) {
-//            if (err) {
-//                res.status(500).json({error: 'failed to update'});
-//            }
-//            res.json({message: 'change password'});
-//        });
-//    });
-//});
 //유저 정보 변경 - update사용
-app.put('/api/accounts/:nickname', function (req, res) {
-    Account.update({ nickname: req.params.nickname }, { $set: req.body }, function (err, output) {
+app.put('/api/accounts/:id', function (req, res) {
+    Account.update({ id: req.params.id }, { $set: req.body }, function (err, output) {
         if (err) {
             res.status(500).json({ error: 'database failure' });
             console.log(output);
@@ -86,11 +78,12 @@ app.put('/api/accounts/:nickname', function (req, res) {
     });
 });
 //유저 삭제
-app.delete('/api/accounts/:nickname', function (req, res) {
-    Account.remove({ nickname: req.body.nickname }, function (err, output) {
+app.delete('/api/accounts/:id', function (req, res) {
+    Account.remove({ id: req.params.id }, function (err, output) {
         if (err) {
             return res.status(500).json({ error: 'database failure' });
         }
+        res.json({ message: 'account delete' });
         res.status(204).end();
     });
 });
